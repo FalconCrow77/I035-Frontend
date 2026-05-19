@@ -1,3 +1,5 @@
+const DEFAULT_STATUS = 'todo'
+
 export const boardReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_TASK':
@@ -10,7 +12,7 @@ export const boardReducer = (state, action) => {
             title: action.payload.title,
             description: action.payload.description,
             priority: action.payload.priority,
-            status: action.payload.status || 'todo',
+            status: action.payload.status || DEFAULT_STATUS,
             createdAt: new Date().toLocaleDateString(),
           },
         ],
