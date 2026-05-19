@@ -1,6 +1,6 @@
 const DEFAULT_STATUS = 'todo'
 
-const ACTIONS = {
+export const ACTIONS = {
   ADD_TASK: 'ADD_TASK',
   UPDATE_TASK: 'UPDATE_TASK',
   DELETE_TASK: 'DELETE_TASK',
@@ -17,45 +17,48 @@ const createTask = (payload) => ({
   createdAt: new Date().toLocaleDateString(),
 })
 
+const findTaskById = (tasks, id) => tasks.findIndex(task => task.id === id)
+
+const handleAddTask = (state, payload) => ({
+  ...state,
+  tasks: [...state.tasks, createTask(payload)],
+})
+
+const handleUpdateTask = (state, payload) => ({
+  ...state,
+  tasks: state.tasks.map(task =>
+    task.id === payload.id ? { ...task, ...payload } : task
+  ),
+})
+
+const handleDeleteTask = (state, taskId) => ({
+  ...state,
+  tasks: state.tasks.filter(task => task.id !== taskId),
+})
+
+const handleMoveTask = (state, payload) => ({
+  ...state,
+  tasks: state.tasks.map(task =>
+    task.id === payload.id
+      ? { ...task, status: payload.newStatus }
+      : task
+  ),
+})
+
+const handleSetTasks = (state, payload) => ({
+  ...state,
+  tasks: payload,
+})
+
+const handlers = {
+  [ACTIONS.ADD_TASK]: handleAddTask,
+  [ACTIONS.UPDATE_TASK]: handleUpdateTask,
+  [ACTIONS.DELETE_TASK]: handleDeleteTask,
+  [ACTIONS.MOVE_TASK]: handleMoveTask,
+  [ACTIONS.SET_TASKS]: handleSetTasks,
+}
+
 export const boardReducer = (state, action) => {
-  switch (action.type) {
-    case ACTIONS.ADD_TASK:
-      return {
-        ...state,
-        tasks: [...state.tasks, createTask(action.payload)],
-      }
-
-    case ACTIONS.UPDATE_TASK:
-      return {
-        ...state,
-        tasks: state.tasks.map((task) =>
-          task.id === action.payload.id ? { ...task, ...action.payload } : task
-        ),
-      }
-
-    case ACTIONS.DELETE_TASK:
-      return {
-        ...state,
-        tasks: state.tasks.filter((task) => task.id !== action.payload),
-      }
-
-    case ACTIONS.MOVE_TASK:
-      return {
-        ...state,
-        tasks: state.tasks.map((task) =>
-          task.id === action.payload.id
-            ? { ...task, status: action.payload.newStatus }
-            : task
-        ),
-      }
-
-    case ACTIONS.SET_TASKS:
-      return {
-        ...state,
-        tasks: action.payload,
-      }
-
-    default:
-      return state
-  }
+  const handler = handlers[action.type]
+  return handler ? handler(state, action.payload) : state
 }
